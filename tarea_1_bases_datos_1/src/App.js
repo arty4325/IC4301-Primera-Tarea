@@ -47,7 +47,19 @@ function App() {
       return;
     }
 
-    // TODO View (For example) that salary is correct
+    const nombreRegex = /^[a-zñáéíóú-]+$/;
+    //nombre solo puede tener letras, ñ, vocales tildadas y guiones
+    if (!nombreRegex.test(nombre.toLowerCase())) {
+      setError('El nombre solo puede contener letras o guiones.');
+      return;
+    }
+  
+    const salarioRegex = /^\d+(\.\d{1,2})?$/;
+    //solo puede tener numeros, y es opcional que tenga un punto y 1 o 2 decimales
+    if (!salarioRegex.test(salario)) {
+      setError('El salario debe ser un número válido, por ejemplo: 1000 o 1500.50');
+      return;
+    }
 
     // If everything is ok, go through backend
     try {
@@ -68,7 +80,6 @@ function App() {
         setNombre('');
         setSalario('');
         // Go back to the list view
-        setVista('list');
       }
     } catch (error) {
       console.error('Error al insertar empleado:', error);
@@ -107,8 +118,12 @@ function App() {
 
           <div className="form-buttons">
             <button type="submit">Insertar</button>
-            <button type="button" onClick={() => setVista('list')}>
-              Cancelar
+            <button type="button" onClick={() => {
+              setVista('list'); 
+              setMensaje('');
+              setError('');
+            }}>
+              Regresar
             </button>
           </div>
         </form>
@@ -120,9 +135,7 @@ function App() {
   return (
     <div className="container">
       <h1>Lista de Empleados</h1>
-      <button className="btn-insertar" onClick={() => setVista('insert')}>
-        Insertar Nuevo
-      </button>
+      
 
       {empleados.length === 0 ? (
         <p>No hay empleados registrados o no se pudo obtener la lista.</p>
@@ -146,6 +159,9 @@ function App() {
           </tbody>
         </table>
       )}
+      <button className="btn-insertar" onClick={() => setVista('insert')}>
+        Insertar Nuevo
+      </button>
     </div>
   );
 }

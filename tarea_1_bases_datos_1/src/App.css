@@ -23,7 +23,7 @@ h1, h2 {
 
 .btn-insertar {
   display: block;
-  margin: 20px auto;
+  margin: 20px 0 20px 40px;
   padding: 10px 20px;
   border: none;
   background-color: #6200ee;
