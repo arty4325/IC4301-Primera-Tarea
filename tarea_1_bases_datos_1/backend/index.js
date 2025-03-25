@@ -6,30 +6,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Config the connection to the sql server
 const dbConfig = {
-    user: 'reactapp',
-    password: '#Franco123',
-    server: 'mssql-194296-0.cloudclusters.net', // Host
-    port: 10047,                                // Port
-    database: 'EMPLEADOS',                 // Indicates the db we are working on
-    options: {
-      encrypt: true, 
-      trustServerCertificate: true 
-    }
-  };
+  user: 'reactapp',
+  password: '#Franco123',
+  server: 'mssql-194296-0.cloudclusters.net',
+  port: 10047,
+  database: 'EMPLEADOS',
+  options: {
+    encrypt: true,
+    trustServerCertificate: true 
+  }
+};
 
-/* 
-   1. ENDPOINT: Obtain employees
-*/
 app.get('/api/empleados', async (req, res) => {
   try {
     let pool = await sql.connect(dbConfig);
-    
-    // Excecute the stored procedure
     const result = await pool.request().execute('SpListarEmpleados');
-    
-    // Returns data
     res.json(result.recordset);
   } catch (error) {
     console.error('Error al listar empleados:', error);
@@ -37,9 +29,6 @@ app.get('/api/empleados', async (req, res) => {
   }
 });
 
-/* 
-   2. ENDPOINT: Incert Employee
-*/
 app.post('/api/empleados', async (req, res) => {
   const { Nombre, Salario } = req.body;
 
@@ -49,22 +38,18 @@ app.post('/api/empleados', async (req, res) => {
 
   try {
     let pool = await sql.connect(dbConfig);
-
-    // Call the Stored Procedure with input and output parameters
     let spResult = await pool.request()
-      .input('Nombre', sql.VarChar(128), Nombre)
-      .input('Salario', sql.Money, Salario)
-      .output('CodigoError', sql.Int) 
+      .input('inNombre', sql.VarChar(128), Nombre)
+      .input('inSalario', sql.Money, Salario)
+      .output('outCodigoError', sql.Int)
       .execute('SpInsertarEmpleado');
 
-    const codigoError = spResult.output.CodigoError;
+    const codigoError = spResult.output.outCodigoError;
 
     if (codigoError === 1) {
-      // If StoredProcedure returns 1, employee already exists
       return res.status(400).json({ message: 'El empleado ya existe.' });
     }
 
-    // OK statement returned
     res.status(201).json({ message: 'Empleado insertado exitosamente.' });
   } catch (error) {
     console.error('Error al insertar empleado:', error);
