@@ -1,37 +1,51 @@
 CREATE PROCEDURE dbo.SpListarEmpleados
 AS
 BEGIN
-    SELECT 
-        id,
-        Nombre,
-        Salario
-    FROM dbo.Empleado
-    ORDER BY Nombre ASC;
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        SELECT 
+            id,
+            Nombre,
+            Salario
+        FROM dbo.Empleado
+        ORDER BY Nombre ASC;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH;
+
+    SET NOCOUNT OFF;
 END;
 GO
 
-
 CREATE PROCEDURE dbo.SpInsertarEmpleado
-    @Nombre VARCHAR(128),
-    @Salario MONEY,
-    @CodigoError INT OUTPUT  
+    @inNombre VARCHAR(128),
+    @inSalario MONEY,
+    @outCodigoError INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Primero se verifica si ya existe
-    IF EXISTS (SELECT 1 FROM dbo.Empleado WHERE Nombre = @Nombre)
-    BEGIN
-        -- Se da un codigo de error 1, si el empleado existe
-        SET @CodigoError = 1;
-        RETURN;
-    END
+    BEGIN TRY
+        -- Verificar si ya existe el empleado
+        IF EXISTS (SELECT 1 FROM dbo.Empleado WHERE Nombre = @inNombre)
+        BEGIN
+            SET @outCodigoError = 1;
+            RETURN;
+        END;
 
-    -- Si no existe, se inserta
-    INSERT INTO dbo.Empleado(Nombre, Salario)
-    VALUES (@Nombre, @Salario);
+        -- Insertar el nuevo empleado
+        INSERT INTO dbo.Empleado (Nombre, Salario)
+        VALUES (@inNombre, @inSalario);
 
-    -- Si todo salio bien, 0 en el CodigoError
-    SET @CodigoError = 0;
+        SET @outCodigoError = 0;
+    END TRY
+    BEGIN CATCH
+        SET @outCodigoError = 50000;
+        THROW;
+    END CATCH;
+
+    SET NOCOUNT OFF;
 END;
 GO
