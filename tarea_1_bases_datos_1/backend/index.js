@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const dbConfig = {
+const dbConfig = { // Connection to the database (Using public ip and credentials)
   user: 'reactapp',
   password: '#Franco123',
   server: 'mssql-194296-0.cloudclusters.net',
@@ -18,22 +18,22 @@ const dbConfig = {
   }
 };
 
-app.get('/api/empleados', async (req, res) => {
+app.get('/api/empleados', async (req, res) => { // Endpoint get empleados
   try {
     let pool = await sql.connect(dbConfig);
-    const result = await pool.request().execute('SpListarEmpleados');
+    const result = await pool.request().execute('SpListarEmpleados'); // Excec stored procedure SpListarEmpleados
     res.json(result.recordset);
   } catch (error) {
-    console.error('Error al listar empleados:', error);
+    console.error('Error al listar empleados:', error); // Catches errors
     res.status(500).json({ message: 'Error al obtener empleados.' });
   }
 });
 
-app.post('/api/empleados', async (req, res) => {
+app.post('/api/empleados', async (req, res) => { // Enpoint post empleados
   const { Nombre, Salario } = req.body;
 
   if (!Nombre || !Salario) {
-    return res.status(400).json({ message: 'Name and salary are required.' });
+    return res.status(400).json({ message: 'Name and salary are required.' }); // The endpoint is only excecuted when the name and the salary are placed
   }
 
   try {
@@ -47,10 +47,10 @@ app.post('/api/empleados', async (req, res) => {
     const codigoError = spResult.output.outCodigoError;
 
     if (codigoError === 1) {
-      return res.status(400).json({ message: 'El empleado ya existe.' });
+      return res.status(400).json({ message: 'El empleado ya existe.' }); // Employee exists
     }
 
-    res.status(201).json({ message: 'Empleado insertado exitosamente.' });
+    res.status(201).json({ message: 'Empleado insertado exitosamente.' }); // Employee insert 
   } catch (error) {
     console.error('Error al insertar empleado:', error);
     res.status(500).json({ message: 'Error al insertar empleado.' });
